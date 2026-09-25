@@ -347,6 +347,28 @@ parts:
       - -usr/lib/*/libicuuc.*
       - -usr/lib/*/libicui18n.*
 
+  # libcupsfilters requires pdfio >= 1.6.4 unconditionally, and core22 ships no
+  # pdfio package, so it is built here from the upstream release tarball. The
+  # tarball carries a generated ./configure, which keeps the autotools plugin
+  # from running autoreconf -- upstream documents that regenerating with
+  # automake/autoheader breaks the PDFio build system.
+  pdfio:
+    source: https://github.com/michaelrsweet/pdfio/releases/download/v1.6.5/pdfio-1.6.5.tar.gz
+    plugin: autotools
+    autotools-configure-parameters:
+      - --prefix=/usr
+    build-packages:
+      - zlib1g-dev
+      - libpng-dev
+      - libjpeg-dev
+    stage:
+      - -usr/lib/lib*.la
+    prime:
+      - -usr/include
+      - -usr/lib/pkgconfig
+      - -usr/share/doc
+      - -usr/share/man
+
   libcupsfilters:
     source: https://github.com/OpenPrinting/libcupsfilters
     source-type: git
@@ -416,7 +438,7 @@ parts:
       - usr/lib/*/nss
       # Reported unused by snapcraft linter
       - -usr/lib/*/libssl3.*
-    after: [cups, qpdf, ghostscript]
+    after: [cups, qpdf, ghostscript, pdfio]
 
   libppd:
     source: https://github.com/OpenPrinting/libppd
