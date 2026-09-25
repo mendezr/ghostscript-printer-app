@@ -925,6 +925,12 @@ parts:
     autotools-configure-parameters:
       - --prefix=/usr
       - --sysconfdir=/etc
+    build-environment:
+      # global.h declares bool-typed fields without including <stdbool.h>, so
+      # every translation unit fails with "unknown type name 'bool'". The
+      # sources are a Debian-packaged snapshot of a dead upstream; forcing the
+      # header in is less invasive than patching each file.
+      - CFLAGS: "-include stdbool.h"
     override-build: |
       set -eux
       # "Unlock" config file
