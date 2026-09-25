@@ -69,10 +69,11 @@ jobs:
           git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $basic" \
             push --force "https://github.com/${REPOSITORY}.git" "HEAD:refs/heads/$branch"
           if existing="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')" && [[ -n "$existing" ]]; then
+            gh pr edit "$existing" --base testing
             printf 'Updated dependency PR #%s\n' "$existing"
           else
             gh pr create \
-              --base main \
+              --base testing \
               --head "$branch" \
               --title 'chore(deps): update FSDK appliance sources' \
               --body 'Automated atomic update of the freedesktop-sdk junction and repository-owned BuildStream sources. The workflow completed the CUPS patch-chain gate and full appliance verification before opening this PR. Auto-merge is intentionally disabled.'

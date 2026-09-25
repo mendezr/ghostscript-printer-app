@@ -27,8 +27,7 @@ printer](http://www.openprinting.org/printers/), [by
 driver](http://www.openprinting.org/drivers/),
 [Downlod](http://github.com/OpenPrinting/foomatic-db)) is used.
 
-Your contributions are welcome. Please post [issues and pull
-requests](https://github.com/OpenPrinting/ghostscript-printer-app).
+For the Bluefin OCI appliance, report [issues](https://github.com/projectbluefin/ghostscript-printer-app/issues) and propose changes to the `testing` branch of [the Bluefin fork](https://github.com/projectbluefin/ghostscript-printer-app). For upstream application and Snap changes, use [OpenPrinting](https://github.com/OpenPrinting/ghostscript-printer-app).
 
 
 ### Contained Printer Drivers
@@ -405,13 +404,20 @@ For real hardware, follow the separate
 [USB and network printer validation procedure](docs/oci-physical-validation.md).
 Synthetic CI results are not physical-printer evidence.
 
-### Releases
+### Development and releases
 
-Maintainers publish by pushing a Git tag exactly matching `v$(cat VERSION)`.
-The tag workflow builds and verifies native amd64 and arm64 images, publishes
-the matching immutable GHCR multi-architecture index, and verifies its SPDX
-SBOM, keyless signatures, GitHub provenance, and OCI metadata. It never
-publishes a mutable channel alias.
+Open OCI development and daily FSDK source-update PRs against `testing`. CI runs
+the full `just verify` appliance gate on `testing` and `stable` PRs and pushes.
+Use the manually dispatched `promote-stable.yml` workflow with the exact current
+`testing` commit; it rebuilds and verifies both native architectures before
+fast-forwarding `stable`. Retain `main` only while existing feature branches or
+workflows still reference it.
+
+Only a tag on `stable` exactly matching `v$(cat VERSION)` can publish an OCI
+release. The release workflow builds and verifies native amd64 and arm64 images,
+publishes the matching immutable GHCR multi-architecture index, and verifies
+its SPDX SBOM, keyless signatures, GitHub provenance, and OCI metadata. It
+never publishes a mutable channel alias.
 
 ## BUILDING WITHOUT PACKAGING OR INSTALLATION
 
