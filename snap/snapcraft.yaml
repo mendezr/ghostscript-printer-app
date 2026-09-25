@@ -363,6 +363,10 @@ parts:
       - --prefix=/usr
       - --disable-avahi
       - --disable-mutool
+      # libcupsfilters 2.2.1 enables JPEG-XL by default and makes a missing
+      # libjxl fatal. 2.2.0 had no JPEG-XL support at all, so opting out keeps
+      # the payload this snap has always shipped.
+      - --without-jpegxl
     build-packages:
       - gettext
       - autoconf
