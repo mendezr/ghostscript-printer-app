@@ -367,6 +367,9 @@ parts:
       - --prefix=/usr
       - --disable-avahi
       - --disable-mutool
+      # core22 (jammy) has no libjxl-dev; libcupsfilters 2.2.1 configure
+      # enables JPEG-XL by default and hard-fails when libjxl is absent.
+      - --without-jpegxl
     build-packages:
       - gettext
       - autoconf
