@@ -63,9 +63,7 @@ fetch:
 build:
     #!/usr/bin/env bash
     set -euo pipefail
-    just bst build --ignore-project-source-remotes \
-        --source-remote https://cache.projectbluefin.io:11001 \
-        oci/ghostscript-printer-app.bst
+    just bst build oci/ghostscript-printer-app.bst
     just export
 
 export:
