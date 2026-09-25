@@ -23,13 +23,13 @@ metadata:
 
 ## Core Process
 
-1. Treat `snap/snapcraft.yaml`, the FSDK elements, and root `patches/` as the current behavior contract; consult Git history only when auditing the retired OCI implementation.
+1. Treat the upstream application source, the pinned FSDK elements, and root `patches/` as the current OCI behavior contract; consult Git history only when auditing retired container implementations.
 2. Keep one CUPS artifact owner. The FSDK junction must continue to own CUPS so its reverse dependencies build against the same libraries.
 3. Keep CUPS-only source patches under `patches/cups/`. The `patch_queue` plugin applies every file in its directory, so unrelated patches must stay elsewhere.
 4. Stage `patches/cups/` into the FSDK junction with a `local` source. Apply `patches/freedesktop-sdk/` at the junction project level; that project patch injects the nested CUPS source `patch_queue` and adjusts FSDK's CUPS configuration.
 5. Do not use `config.overrides` for small CUPS patches or feature switches. BuildStream documents overrides as complete downstream ownership that stops inheriting upstream element updates.
 6. Do not stage a second CUPS implementation. Duplicate `libcups.so*` ownership creates an artifact overlap and can compile reverse dependencies against a different library than the application receives.
-7. Shared CUPS patches remain under `patches/cups/` for both Snap and FSDK. Apply patches from the source root when their paths start with `a/backend/` and use `-p1`.
+7. Keep the canonical CUPS source patches under `patches/cups/`; stage them into the FSDK junction, apply from the source root for paths starting with `a/backend/`, and never maintain copied variants across printer-app forks.
 8. Cross-junction source checkouts nest under `<junction>/<element-path>/`; the CUPS probe therefore checks `freedesktop-sdk/components-_private-cups-base/`, not the checkout root.
 9. Match FSDK's multiarch install layout for every repository-built library. Define `gcc-triplet`, `lib`, and `libdir` in the root project and pass `--libdir=%{libdir}` to Autotools; FSDK's `pkg-config` searches `/usr/lib/<gcc-triplet>/pkgconfig`, not `/usr/lib/pkgconfig`.
 10. Do not `chown` high numeric runtime IDs inside the BuildStream sandbox; user-namespace mappings can reject them with `EINVAL`. After composition, reapply writable directory modes in the final OCI layer. Remove inherited `/run` service directories and let the numeric runtime user recreate them so ownership checks observe the actual user.
@@ -38,6 +38,7 @@ metadata:
 13. Stage component-specific source patches in separate junction directories. `patches/cups-filters/` is injected into FSDK's existing `components/cups-filters.bst`; never mix it with CUPS or libcupsfilters patches.
 14. Keep Ghostscript on its bundled zlib. FSDK's zlib-ng compatibility library corrupts compiled Ghostscript ROMFS reads when a full-size IJS page lazily loads an ICC profile; the failure appears as `free(): invalid size` from `s_block_read_process`. A default Letter pxljr conversion is the regression probe.
 15. Treat filter executables by format: use `ldd` only for ELF binaries, and resolve script shebangs plus every invoked command separately. Generated pyppd archives use `#!/usr/bin/env python3`, so each owning element declares the Python runtime even when another aggregate currently supplies it.
+16. When a nested FSDK source cache returns `DEADLINE_EXCEEDED` on blobs, keep immutable refs and try `bst source fetch --ignore-project-source-remotes --source-remote https://cache.projectbluefin.io:11001 --deps all oci/ghostscript-printer-app.bst`. This completed a full pinned FSDK 26.08.1 source fetch while the upstream source CAS timed out; the separate artifact cache can still miss or time out, so a successful source fetch is not evidence that the appliance built.
 
 ## Common Rationalizations
 
